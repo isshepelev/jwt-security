@@ -29,12 +29,12 @@ public class AuthController {
 
     @PostMapping("/auth")
     public ResponseEntity<?> createToken(@RequestBody JwtRequest authRequest) {
-        return authService.createAuthToken(authRequest);
+        return authService.createToken(authRequest);
     }
 
 
     @PostMapping("/reg")
-    public ResponseEntity<?> createNewUser(@RequestBody RegistrationUserDTO registrationUserDto) {
-        return authService.createNewUser(registrationUserDto);
+    public ResponseEntity<?> createNewUser(@RequestBody RegistrationUserDTO registrationUserDTO) {
+        return authService.createNewUser(registrationUserDTO);
     }
 }

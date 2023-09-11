@@ -19,22 +19,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-    private UserRepository userRepository;
-    private RoleService roleService;
-    private PasswordEncoder passwordEncoder;
+    private  UserRepository userRepository;
+    private  RoleRepository roleRepository;
+    private  PasswordEncoder passwordEncoder;
 
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
-    @Autowired
-    public void setRoleService(RoleService roleService) {
-        this.roleService = roleService;
+@Autowired
+    public void setRoleRepository(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
     }
-
-    @Autowired
+@Autowired
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
@@ -46,14 +45,13 @@ public class UserService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(
-                String.format("Пользователь '%s' не найден", username)
-        ));
+        User user = findByUsername(username).orElseThrow(
+                () -> new UsernameNotFoundException(String.format("Пользователь '%s' не найден", username)));
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
-        );
+                user.getRoles().stream().map(
+                        role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()));
     }
 
     public User createNewUser(RegistrationUserDTO registrationUserDto) {
@@ -61,7 +59,7 @@ public class UserService implements UserDetailsService {
         user.setUsername(registrationUserDto.getUsername());
         user.setEmail(registrationUserDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationUserDto.getPassword()));
-        user.setRoles(List.of(roleService.getUserRole()));
+        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
         return userRepository.save(user);
     }
 }

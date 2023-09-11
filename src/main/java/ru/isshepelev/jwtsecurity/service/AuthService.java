@@ -1,6 +1,7 @@
 package ru.isshepelev.jwtsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import ru.isshepelev.jwtsecurity.DTO.JwtRequest;
 import ru.isshepelev.jwtsecurity.DTO.JwtResponse;
 import ru.isshepelev.jwtsecurity.DTO.RegistrationUserDTO;
-import ru.isshepelev.jwtsecurity.DTO.UserDTO;
 
+
+import ru.isshepelev.jwtsecurity.DTO.UserDTO;
 import ru.isshepelev.jwtsecurity.entity.User;
 import ru.isshepelev.jwtsecurity.exceptions.AppError;
 import ru.isshepelev.jwtsecurity.utils.JwtTokenUtils;
@@ -25,16 +27,18 @@ public class AuthService {
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
 
-    public ResponseEntity<?> createAuthToken(@RequestBody JwtRequest authRequest) {
+
+    public ResponseEntity<?> createToken(@RequestBody JwtRequest authRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "Неправильный логин или пароль"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "Некорректный логин или пароль"), HttpStatus.UNAUTHORIZED);
         }
         UserDetails userDetails = userService.loadUserByUsername(authRequest.getUsername());
         String token = jwtTokenUtils.generateToken(userDetails);
         return ResponseEntity.ok(new JwtResponse(token));
     }
+
 
     public ResponseEntity<?> createNewUser(@RequestBody RegistrationUserDTO registrationUserDto) {
         if (!registrationUserDto.getPassword().equals(registrationUserDto.getConfirmPassword())) {
